@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="VeriSQL Stateful Text-to-SQL Agent enterprise workspace">
+  <meta name="theme-color" content="#071019">
+  <title>VeriSQL · 数据智能工作台</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div id="login-screen" class="login-screen hidden">
+    <div class="login-ambient login-ambient-a"></div><div class="login-ambient login-ambient-b"></div>
+    <form id="login-form" class="login-card">
+      <div class="brand-mark brand-mark-large" aria-hidden="true">V</div>
+      <p class="eyebrow">VERISQL WORKSPACE</p><h1>欢迎回来</h1>
+      <p class="login-intro">连接数据，描述问题，让 Agent 安全地完成查询。</p>
+      <label for="login-username">用户名</label><input id="login-username" autocomplete="username" required>
+      <label for="login-password">密码</label><input id="login-password" type="password" autocomplete="current-password" required>
+      <button type="submit" class="primary-button">进入工作台 <span aria-hidden="true">→</span></button>
+      <span id="login-error" class="form-error" aria-live="polite"></span>
+    </form>
+  </div>
+
+  <header class="app-header">
+    <div class="brand">
+      <button id="open-sidebar" class="icon-button mobile-only" type="button" aria-label="打开导航">☰</button>
+      <div class="brand-mark" aria-hidden="true">V</div>
+      <div><b>VeriSQL</b><span>Data Agent Workspace</span></div>
+    </div>
+    <div class="header-context">
+      <span class="context-label">当前数据源</span><strong id="active-source-label">正在加载…</strong><span class="context-separator"></span>
+      <div class="runtime" aria-label="模型运行配置"><span id="status-dot" class="dot"></span><span id="runtime-label">正在连接服务…</span></div>
+    </div>
+    <nav class="top-actions" aria-label="全局操作">
+      <button id="show-admin-center" class="nav-button hidden" type="button">运营中心</button>
+      <button id="show-user-form" class="nav-button hidden" type="button">用户权限</button>
+      <button id="new-session" class="primary-nav" type="button"><span aria-hidden="true">＋</span> 新会话</button>
+      <div class="user-menu"><span class="user-avatar" aria-hidden="true">U</span><span id="current-user" class="current-user"></span><button id="logout" class="text-button" type="button">退出</button></div>
+    </nav>
+  </header>
+
+  <div id="mobile-scrim" class="mobile-scrim hidden"></div>
+  <main class="workspace">
+    <aside id="workspace-sidebar" class="workspace-sidebar">
+      <div class="mobile-panel-head mobile-only"><b>工作区导航</b><button id="close-sidebar" class="icon-button" type="button" aria-label="关闭导航">×</button></div>
+      <section class="sidebar-section source-section">
+        <div class="section-heading"><div><span class="section-kicker">DATA SOURCE</span><h2>数据源</h2></div><span id="source-kind" class="chip">Read only</span></div>
+        <select id="data-source-select" aria-label="选择数据源"></select><p id="source-summary" class="source-summary"></p><div id="source-health" class="source-health"></div>
+        <div class="source-toolbar source-management"><button id="show-source-form" class="secondary-button" type="button">＋ 添加</button><button id="edit-source" class="ghost-button" type="button">编辑</button><button id="show-catalog" class="ghost-button" type="button">语义</button><button id="test-source" class="ghost-button" type="button">检查</button><button id="toggle-source" class="ghost-button" type="button">停用</button></div>
+        <div class="source-secondary-actions"><button id="show-source-grants" class="text-button hidden" type="button">共享与授权</button><button id="delete-source" class="text-button danger-text" type="button">删除数据源</button></div>
+      </section>
+      <section class="sidebar-section history-panel">
+        <div class="section-heading compact"><div><span class="section-kicker">CONVERSATIONS</span><h2>查询会话</h2></div><button id="refresh-sessions" class="icon-button" type="button" aria-label="刷新会话">↻</button></div>
+        <div id="session-list" class="session-list"><div class="sidebar-empty">暂无历史会话</div></div><div id="session-query-list" class="session-query-list hidden"></div>
+      </section>
+      <section class="sidebar-section examples">
+        <span class="section-kicker">QUICK START</span><h2>示例问题</h2>
+        <button class="example" type="button"><span>01</span>各部门的平均薪资是多少？</button><button class="example" type="button"><span>02</span>华东区（部门1）的 sales 总 amount 是多少？</button><button class="example" type="button"><span>03</span>列出所有员工姓名</button>
+      </section>
+      <section class="sidebar-section mobile-account-actions mobile-only"><button id="mobile-admin-center" class="secondary-button hidden" type="button">运营中心</button><button id="mobile-user-form" class="ghost-button hidden" type="button">用户权限</button></section>
+    </aside>
+
+    <section class="query-canvas">
+      <div class="canvas-header">
+        <div><p class="eyebrow">NATURAL LANGUAGE QUERY</p><h1>用自然语言探索数据</h1><p>Agent 会检索 Schema、生成 SQL，并在只读执行前完成 AST 与成本检查。</p></div>
+        <button id="show-trace-panel" class="secondary-button trace-toggle" type="button">查看执行轨迹</button>
+      </div>
+      <form id="query-form" class="query-composer">
+        <label class="sr-only" for="question">向数据库提问</label><textarea id="question" name="question" rows="3" maxlength="2000" placeholder="例如：过去 30 天销售额最高的 10 个商品是什么？" required></textarea>
+        <div class="composer-footer"><div class="composer-hints"><span class="security-badge">只读查询</span><span>Ctrl/⌘ + Enter 运行</span></div><div class="composer-actions"><button id="cancel-query" class="danger-button hidden" type="button">取消请求</button><button id="submit" class="primary-button" type="submit">运行 Agent <span aria-hidden="true">→</span></button></div></div>
+        <div id="stream-status" class="stream-status hidden" aria-live="polite"></div>
+      </form>
+      <div id="empty-state" class="empty-state"><div class="empty-orbit" aria-hidden="true"><span></span><i></i></div><h2>从一个业务问题开始</h2><p>查询结果、SQL、风险提示和可视化会集中呈现在这里。</p><div class="capability-row"><span>Schema RAG</span><span>SQLGlot AST</span><span>EXPLAIN</span><span>只读执行</span></div></div>
+      <div id="result" class="result hidden" aria-live="polite">
+        <section class="answer-card"><div class="result-head"><div><p class="eyebrow">FINAL ANSWER</p><h2 id="answer"></h2></div><span id="result-status" class="status-pill"></span></div><section id="confidence-warning" class="confidence-warning hidden"></section></section>
+        <section class="sql-box"><div class="box-label"><span>生成的 SQL</span><button id="copy-sql" class="copy-button" type="button">复制 SQL</button></div><pre><code id="sql"></code></pre></section>
+        <section class="data-card">
+          <div class="data-card-head"><div><p class="eyebrow">QUERY RESULT</p><h2>数据结果</h2></div><section id="result-tools" class="result-tools hidden"><div class="pagination-controls"><button id="page-prev" type="button">←</button><span id="page-label">第 1 页</span><button id="page-next" type="button">→</button><select id="page-size" aria-label="每页行数"><option>20</option><option selected>50</option><option>100</option><option>200</option></select></div><div class="result-actions"><button id="export-csv" type="button">导出 CSV</button><button id="toggle-chart" type="button">可视化</button></div></section></div>
+          <section id="table-wrap" class="table-wrap"></section>
+          <section id="chart-panel" class="chart-panel hidden"><div class="chart-controls"><label>图表<select id="chart-type"><option value="bar">柱状图</option><option value="line">折线图</option><option value="pie">饼图</option></select></label><label>分类列<select id="chart-category"></select></label><label>数值列<select id="chart-value"></select></label><button id="render-chart" type="button">重新绘制</button></div><div id="chart-canvas" class="chart-canvas"></div><p class="field-help">图表仅使用当前页最多 200 行，不会发送到第三方服务。</p></section>
+        </section>
+        <section class="feedback-box" aria-label="结果反馈"><div><p class="eyebrow">HUMAN FEEDBACK</p><b>这次查询结果正确吗？</b><p>你的判断会进入在线评测，但不会未经审核直接用于训练。</p></div><div class="feedback-actions"><button class="feedback-button" type="button" data-verdict="correct">✓ 正确</button><button class="feedback-button" type="button" data-verdict="incorrect">× 错误</button></div><textarea id="feedback-comment" rows="2" maxlength="1000" placeholder="可选：补充错误原因或期望结果"></textarea><span id="feedback-status" aria-live="polite"></span></section>
+        <details class="trace-details"><summary>查看完整运行指标</summary><div id="trace" class="trace-grid"></div></details>
+      </div>
+      <div id="error" class="error hidden" role="alert"></div>
+    </section>
+
+    <aside id="trace-rail" class="trace-rail">
+      <div class="trace-rail-head"><div><span class="live-indicator"></span><div><span class="section-kicker">LIVE AGENT TRACE</span><h2>执行轨迹</h2></div></div><button id="close-trace-panel" class="icon-button tablet-only" type="button" aria-label="关闭执行轨迹">×</button></div>
+      <div id="trace-empty" class="trace-empty"><div class="trace-empty-icon">⌁</div><p>运行查询后，这里会按真实顺序展示 Agent 每一步的状态和耗时。</p></div>
+      <section id="execution-flow" class="execution-flow hidden" aria-live="polite"><div class="flow-head"><span id="flow-total" class="flow-total">运行中</span></div><ol id="flow-steps" class="flow-steps"></ol><div id="flow-metrics" class="flow-metrics"></div></section>
+    </aside>
+  </main>
+
+  <section id="user-form" class="management-drawer hidden" aria-label="用户与权限"><div class="drawer-head"><div><p class="eyebrow">ACCESS CONTROL</p><h2>用户与权限</h2></div><button id="cancel-user" class="icon-button" type="button" aria-label="关闭">×</button></div><div id="user-list" class="user-list"></div><form id="create-user-form" class="nested-form"><h3>创建用户</h3><label>用户名<input id="new-username" pattern="[A-Za-z0-9_.-]+" required></label><label>初始密码<input id="new-password" type="password" minlength="8" required></label><label>角色<select id="new-role"><option value="viewer">只读访客</option><option value="analyst" selected>查询分析员</option><option value="developer">数据源开发者</option><option value="admin">管理员</option><option value="superadmin">超级管理员</option></select></label><div class="source-actions"><button class="primary-button" type="submit">创建用户</button></div><span id="user-status"></span></form></section>
+  <form id="source-grants-form" class="management-drawer hidden"><div class="drawer-head"><div><p class="eyebrow">SOURCE ACCESS</p><h2>数据源授权</h2></div><button id="cancel-grants" class="icon-button" type="button" aria-label="关闭">×</button></div><div id="source-grants-list" class="user-list"></div><label>授权用户<select id="grant-user"></select></label><label>访问级别<select id="grant-level"><option value="read">查看元数据</option><option value="query" selected>允许查询</option><option value="manage">管理（不可转授权）</option></select></label><div class="source-actions"><button id="save-grant" class="primary-button" type="button">保存授权</button></div><span id="grant-status"></span></form>
+  <form id="source-form" class="management-drawer hidden"><div class="drawer-head"><div><p class="eyebrow">DATA CONNECTION</p><h2 id="source-form-title">添加数据源</h2></div><button id="cancel-source" class="icon-button" type="button" aria-label="关闭">×</button></div><label>名称<input id="source-name" required></label><label>说明<input id="source-description" maxlength="500" placeholder="例如：生产销售库，只读"></label><label>接入方式<select id="source-type"><option value="sqlite">上传 SQLite 文件</option><option value="mysql">连接 MySQL 数据库</option><option value="postgresql">连接 PostgreSQL 数据库</option></select></label><div id="sqlite-fields"><label>SQLite 数据库文件<input id="sqlite-file" type="file" accept=".sqlite,.sqlite3,.db,application/vnd.sqlite3" required></label><p class="field-help">支持 .sqlite、.sqlite3、.db，上传后自动检查完整性和 Schema。</p></div><div id="mysql-fields" class="hidden"><p class="field-help">MySQL 通过只读网络账号连接，不能直接上传物理数据文件。</p><label>主机<input id="mysql-host" placeholder="127.0.0.1"></label><label>端口<input id="mysql-port" type="number" value="3306"></label><label>数据库<input id="mysql-database"></label><label>只读用户<input id="mysql-user"></label><label>密码<input id="mysql-password" type="password" autocomplete="new-password"></label><label class="check-label"><input id="mysql-ssl" type="checkbox">启用 TLS</label></div><div id="postgresql-fields" class="hidden"><p class="field-help">DSN 不得包含密码；密码会单独加密保存。</p><label>DSN<input id="postgresql-dsn" placeholder="postgresql://reader@db.example.com:5432/business"></label><label>Schema<input id="postgresql-schemas" value="public" placeholder="public,analytics"></label><label>密码<input id="postgresql-password" type="password" autocomplete="new-password"></label></div><div class="source-actions"><button id="save-source" class="primary-button" type="submit">上传并保存</button></div><span id="source-status"></span></form>
+  <section id="catalog-drawer" class="management-drawer catalog-drawer hidden" aria-label="Schema 语义目录"><div class="drawer-head"><div><p class="eyebrow">SEMANTIC CATALOG</p><h2>Schema 语义目录</h2></div><button id="cancel-catalog" class="icon-button" type="button" aria-label="关闭">×</button></div><p class="field-help">描述用于 Schema 检索，不会修改业务数据库。AI 增强只发送表名、字段名、类型和关系，不发送字段值。</p><div class="catalog-actions"><button id="sync-catalog" class="ghost-button" type="button">同步结构</button><button id="enrich-catalog" class="secondary-button" type="button">AI 生成描述</button><button id="save-catalog" class="primary-button" type="button">保存修改</button></div><span id="catalog-status" aria-live="polite"></span><div id="catalog-list" class="catalog-list"></div></section>
+
+  <section id="admin-center" class="admin-overlay hidden" aria-label="管理中心"><div class="admin-panel"><div class="admin-head"><div><p class="eyebrow">OPERATIONS CENTER</p><h2>运营与可观测中心</h2><p>审计、Agent Trace、用户反馈与在线评测。</p></div><button id="close-admin-center" class="icon-button" type="button" aria-label="关闭管理中心">×</button></div><div id="admin-metrics" class="admin-metrics"></div><div id="admin-trend" class="admin-trend"></div><div class="admin-tabs"><button type="button" data-admin-tab="traces" class="selected">查询与 Trace</button><button type="button" data-admin-tab="resources">资源审计</button><button type="button" data-admin-tab="feedback">用户反馈</button><button type="button" data-admin-tab="evaluation">在线评测</button></div><div id="admin-content" class="admin-content"></div></div></section>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

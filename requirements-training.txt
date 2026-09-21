@@ -1,0 +1,8 @@
+-r requirements.txt
+accelerate>=1,<2
+datasets>=3,<5
+peft>=0.13,<1
+torch>=2.4
+transformers>=4.45,<6
+
+# Install vLLM and verl versions that match the host CUDA/PyTorch stack.

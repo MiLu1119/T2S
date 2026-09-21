@@ -1,0 +1,34 @@
+{
+  "tables": {
+    "departments": {
+      "description": "部门、组织架构、团队信息",
+      "value_grounding_columns": ["dept_name"],
+      "columns": {
+        "dept_id": "部门唯一编号",
+        "dept_name": "部门名称"
+      }
+    },
+    "employees": {
+      "description": "员工、人事、薪资和入职信息",
+      "value_grounding_columns": [],
+      "columns": {
+        "emp_id": "员工唯一编号",
+        "name": "员工姓名",
+        "dept_id": "员工所属部门编号",
+        "salary": "员工薪资、工资",
+        "hire_date": "入职日期"
+      }
+    },
+    "sales": {
+      "description": "员工销售、产品和销售金额记录",
+      "value_grounding_columns": ["product"],
+      "columns": {
+        "sale_id": "销售记录编号",
+        "emp_id": "负责销售的员工编号",
+        "product": "产品名称",
+        "amount": "销售金额、销售额",
+        "sale_date": "销售日期"
+      }
+    }
+  }
+}

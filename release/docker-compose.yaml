@@ -1,0 +1,60 @@
+name: verisql
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
+  app:
+    image: debian:bookworm-slim
+    restart: unless-stopped
+    init: true
+    working_dir: /app
+    command: ["/opt/verisql/verisql-server"]
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    env_file: [.env]
+    environment:
+      PORT: 8080
+      IDENTITY_DB_PATH: /app/runtime/identity.sqlite
+      AUDIT_DB_PATH: /app/runtime/audit.sqlite
+      DEMO_DB_PATH: /app/runtime/demo.sqlite
+      CHECKPOINT_BACKEND: redis
+      REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@redis:6379/0
+      SQLITE_UPLOAD_DIR: /app/uploads
+    volumes:
+      - ./verisql-server:/opt/verisql/verisql-server:ro
+      - ./models:/app/models
+      - app_runtime:/app/runtime
+      - sqlite_uploads:/app/uploads
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "test", "-r", "/proc/1/status"]
+      interval: 10s
+      timeout: 3s
+      start_period: 180s
+      retries: 5
+    logging:
+      driver: json-file
+      options: {max-size: "20m", max-file: "5"}
+
+volumes:
+  app_runtime:
+  sqlite_uploads:
+  redis_data:
