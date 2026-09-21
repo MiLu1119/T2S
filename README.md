@@ -56,14 +56,19 @@ Schema RAG 当前用于 SQLite 数据源，采用 BM25、字符 N-Gram 与可选
 要求 Python 3.10+。默认使用 Mock 模型，不需要 GPU、模型文件或 API Key。
 
 ```bash
-cd VeriSQL-Agent
+git clone https://github.com/MiLu1119/T2S.git
+cd T2S
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
+# 本地演示也建议修改 WEB_PASSWORD、SESSION_SECRET、DATA_SOURCE_MASTER_KEY
 uvicorn Web_app:app --host 127.0.0.1 --port 8080
 ```
 
-访问 `http://127.0.0.1:8080`，API 文档位于 `/docs`。
+访问 `http://127.0.0.1:8080`，API 文档位于 `/docs`。如果未修改示例配置，首次本地演示登录账号为 `verisql`，密码为 `replace-with-a-long-random-password`；该示例密码不得用于公网部署。
+
+上述步骤会自动创建演示数据库和本地运行状态。Mock 模式用于验证完整 Web/Agent 流程，但只会生成内置规则覆盖的示例 SQL；要查询任意数据库，请按下文配置本地模型或外部 API。
 
 ## Docker 一键部署
 
